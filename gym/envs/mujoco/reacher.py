@@ -144,9 +144,13 @@ class ReacherEnv(mujoco_env.MujocoEnv, utils.EzPickle):
             if np.linalg.norm(self.goal) < 0.2:
                 break
         qpos[-2:] = self.goal
+<<<<<<< Updated upstream
         qvel = self.init_qvel + self.np_random.uniform(
             low=-0.005, high=0.005, size=self.model.nv
         )
+=======
+        qvel = self.init_qvel  + self.np_random.uniform(low=-.005, high=.005, size=self.model.nv)
+>>>>>>> Stashed changes
         qvel[-2:] = 0
         self.set_state(qpos, qvel)
         return self._get_obs()

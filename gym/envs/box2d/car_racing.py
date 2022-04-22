@@ -20,12 +20,21 @@ VIDEO_H = 400
 WINDOW_W = 1000
 WINDOW_H = 800
 
+<<<<<<< Updated upstream
 SCALE = 6.0  # Track scale
 TRACK_RAD = 900 / SCALE  # Track is heavily morphed circle with this radius
 PLAYFIELD = 2000 / SCALE  # Game over boundary
 FPS = 50  # Frames per second
 ZOOM = 2.7  # Camera zoom
 ZOOM_FOLLOW = True  # Set to False for fixed view (don't use zoom)
+=======
+SCALE = 6.0             # Track scale
+TRACK_RAD = 900/SCALE   # Track is heavily morphed circle with this radius
+PLAYFIELD = 2000/SCALE  # Game over boundary
+FPS = 50                # Frames per second. my code: i ahve incr this to 200 from 50 to spead up training!
+ZOOM = 2.7              # Camera zoom
+ZOOM_FOLLOW = False      # Set to False for fixed view (don't use zoom)
+>>>>>>> Stashed changes
 
 
 TRACK_DETAIL_STEP = 21 / SCALE
@@ -399,6 +408,7 @@ class CarRacing(gym.Env, EzPickle):
         self.track = track
         return True
 
+<<<<<<< Updated upstream
     def reset(
         self,
         *,
@@ -407,6 +417,10 @@ class CarRacing(gym.Env, EzPickle):
         options: Optional[dict] = None,
     ):
         super().reset(seed=seed)
+=======
+    def reset(self, mode='human'):
+        assert mode in ['human', 'state_pixels', 'rgb_array']
+>>>>>>> Stashed changes
         self._destroy()
         self.reward = 0.0
         self.prev_reward = 0.0
@@ -462,6 +476,7 @@ class CarRacing(gym.Env, EzPickle):
 
         return self.state, step_reward, done, {}
 
+<<<<<<< Updated upstream
     def render(self, mode: str = "human"):
         import pygame
 
@@ -481,6 +496,24 @@ class CarRacing(gym.Env, EzPickle):
         self.surf = pygame.Surface((WINDOW_W, WINDOW_H))
 
         # computing transformations
+=======
+    def render(self, mode='human'):
+        assert mode in ['human', 'state_pixels', 'rgb_array']
+        if self.viewer is None:
+            from gym.envs.classic_control import rendering
+            self.viewer = rendering.Viewer(WINDOW_W, WINDOW_H)
+            self.score_label = pyglet.text.Label('0000', font_size=36,
+                x=20, y=WINDOW_H*2.5/40.00, anchor_x='left', anchor_y='center',
+                color=(255,255,255,255))
+            self.transform = rendering.Transform()
+
+        if "t" not in self.__dict__: return  # reset() not called yet
+
+        # zoom = 0.1*SCALE*max(1-self.t, 0) + ZOOM*SCALE*min(self.t, 1)   # Animate zoom first second
+        zoom = ZOOM*SCALE   # my code
+        scroll_x = self.car.hull.position[0]
+        scroll_y = self.car.hull.position[1]
+>>>>>>> Stashed changes
         angle = -self.car.hull.angle
         # Animating first second zoom.
         zoom = 0.1 * SCALE * max(1 - self.t, 0) + ZOOM * SCALE * min(self.t, 1)

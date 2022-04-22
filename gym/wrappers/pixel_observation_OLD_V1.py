@@ -2,23 +2,27 @@
 
 import collections
 import copy
-from collections.abc import MutableMapping
 
 import numpy as np
 import OpenGL.GLUT as gl
 
-from gym import ObservationWrapper, spaces
+from gym import spaces
+from gym import ObservationWrapper
 
-<<<<<<< Updated upstream
-STATE_KEY = "state"
+STATE_KEY = 'state'
 
+DEFAULT_WIDTH = 48
+DEFAULT_HEIGHT = 48
 
 class PixelObservationWrapper(ObservationWrapper):
     """Augment observations by pixel values."""
 
-    def __init__(
-        self, env, pixels_only=True, render_kwargs=None, pixel_keys=("pixels",)
-    ):
+    def __init__(self,
+                 env,
+                 pixels_only=True,
+                 render_kwargs=None,
+                 pixel_keys=('pixels', ),
+                 render_shape=None):
         """Initializes a new pixel Wrapper.
 
         Args:
@@ -41,39 +45,37 @@ class PixelObservationWrapper(ObservationWrapper):
             ValueError: If `env`'s observation already contains any of the
                 specified `pixel_keys`.
         """
-=======
-class PixelObservationWrapper(ObservationWrapper):
-    """Augment observations by pixel values."""
 
-    def __init__(self,
-                 env,
-                 render_shape=None):
+        super(PixelObservationWrapper, self).__init__(env)
 
         # Creating a dummy GL Windows to bupas the Error: "GLEW initalization error: Missing GL version"
         gl.glutInit()
         gl.glutInitWindowSize(500, 500)
         gl.glutCreateWindow('GLEW Testing')
->>>>>>> Stashed changes
 
-        super().__init__(env)
-
-<<<<<<< Updated upstream
         if render_kwargs is None:
             render_kwargs = {}
 
         for key in pixel_keys:
             render_kwargs.setdefault(key, {})
 
-            render_mode = render_kwargs[key].pop("mode", "rgb_array")
-            assert render_mode == "rgb_array", render_mode
-            render_kwargs[key]["mode"] = "rgb_array"
+            render_mode = render_kwargs[key].pop('mode', 'rgb_array')
+            assert render_mode == 'rgb_array', render_mode
+            render_kwargs[key]['mode'] = 'rgb_array'
+
+        # if render_shape is not None:
+        #     for pixels in pixel_keys:
+        #         render_kwargs[pixels]['width'] = render_shape[0]
+        #         render_kwargs[pixels]['height'] = render_shape[1]
+
 
         wrapped_observation_space = env.observation_space
 
         if isinstance(wrapped_observation_space, spaces.Box):
             self._observation_is_dict = False
-            invalid_keys = {STATE_KEY}
-        elif isinstance(wrapped_observation_space, (spaces.Dict, MutableMapping)):
+            invalid_keys = set([STATE_KEY])
+        elif isinstance(wrapped_observation_space,
+                        (spaces.Dict, collections.MutableMapping)):
             self._observation_is_dict = True
             invalid_keys = set(wrapped_observation_space.spaces.keys())
         else:
@@ -84,9 +86,8 @@ class PixelObservationWrapper(ObservationWrapper):
             # `observation_keys`
             overlapping_keys = set(pixel_keys) & set(invalid_keys)
             if overlapping_keys:
-                raise ValueError(
-                    f"Duplicate or reserved pixel keys {overlapping_keys!r}."
-                )
+                raise ValueError("Duplicate or reserved pixel keys {!r}."
+                                 .format(overlapping_keys))
 
         if pixels_only:
             self.observation_space = spaces.Dict()
@@ -105,13 +106,12 @@ class PixelObservationWrapper(ObservationWrapper):
             if np.issubdtype(pixels.dtype, np.integer):
                 low, high = (0, 255)
             elif np.issubdtype(pixels.dtype, np.float):
-                low, high = (-float("inf"), float("inf"))
+                low, high = (-float('inf'), float('inf'))
             else:
                 raise TypeError(pixels.dtype)
 
             pixels_space = spaces.Box(
-                shape=pixels.shape, low=low, high=high, dtype=pixels.dtype
-            )
+                shape=pixels.shape, low=low, high=high, dtype=pixels.dtype)
             pixels_spaces[pixel_key] = pixels_space
 
         self.observation_space.spaces.update(pixels_spaces)
@@ -120,44 +120,25 @@ class PixelObservationWrapper(ObservationWrapper):
         self._pixels_only = pixels_only
         self._render_kwargs = render_kwargs
         self._pixel_keys = pixel_keys
-=======
-        self.render_shape =render_shape
-
-        pixels = self.render(mode='rgb_array',width=render_shape[0],height=render_shape[1])
-        low, high = (0, 255)
-        self.observation_space = spaces.Box(shape=pixels.shape, low=low, high=high, dtype=np.uint8)
-        self._max_episode_steps = env._max_episode_steps
 
     def observation(self, observation):
         pixel_observation = self._add_pixel_observation(observation)
         return pixel_observation
 
     def _add_pixel_observation(self, wrapped_observation):
-        return self.render(mode='rgb_array',width=self.render_shape[0],height=self.render_shape[1])
+        if self._pixels_only:
+            observation = collections.OrderedDict()
+        elif self._observation_is_dict:
+            observation = type(wrapped_observation)(wrapped_observation)
+        else:
+            observation = collections.OrderedDict()
+            observation[STATE_KEY] = wrapped_observation
 
+        pixel_observations = {
+            pixel_key: self.env.render(**self._render_kwargs[pixel_key])
+            for pixel_key in self._pixel_keys
+        }
 
-class PixelObservationWrapper_classic(ObservationWrapper):
-    """Augment observations by pixel values."""
+        observation.update(pixel_observations)
 
-    def __init__(self,
-                 env,
-                 render_shape=None):
-        raise NotImplementedError
-
-        super(PixelObservationWrapper_classic, self).__init__(env)
-
-        self.render_shape = render_shape
-
-        low, high = (0, 255)
-        self.observation_space = spaces.Box(shape=(render_shape[0],render_shape[1],3), low=low, high=high, dtype=np.uint8)
-        self._max_episode_steps = env._max_episode_steps
->>>>>>> Stashed changes
-
-    def observation(self, observation):
-        pixel_observation = self._add_pixel_observation(observation)
-        return pixel_observation
-
-    def _add_pixel_observation(self, wrapped_observation):
-        img = self.render('rgb_array')#, width=self.render_shape[0], height=self.render_shape[1])
-        return img
-
+        return observation

@@ -37,3 +37,10 @@ tutorial/*.html
 # PyCharm project files
 .idea
 vizdoom.ini
+
+# GIT mergetool
+*BACKUP*
+*BASE*
+*LOCAL*
+*REMOTE*
+*.orig

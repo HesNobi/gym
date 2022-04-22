@@ -229,8 +229,20 @@ register(
 )
 
 register(
+<<<<<<< Updated upstream
     id="Ant-v3",
     entry_point="gym.envs.mujoco.ant_v3:AntEnv",
+=======
+    id='Ant-v21',
+    entry_point='gym.envs.mujoco.ant_v2_1:AntEnv',
+    max_episode_steps=1000,
+    reward_threshold=6000.0,
+)
+
+register(
+    id='Ant-v3',
+    entry_point='gym.envs.mujoco.ant_v3:AntEnv',
+>>>>>>> Stashed changes
     max_episode_steps=1000,
     reward_threshold=6000.0,
 )
